@@ -5,7 +5,7 @@
 </p>
 
 <p>
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/tiles-dark.svg"><img src="assets/tiles-light.svg" alt="201 repositories: 78 public, 123 private. 1047 contributions in the last 12 months. 49 study repositories. 7 years on GitHub."></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/tiles-dark.svg"><img src="assets/tiles-light.svg" alt="201 repositories: 78 public, 123 private. 1048 contributions in the last 12 months. 49 study repositories. 7 years on GitHub."></picture>
 </p>
 
 <p>
@@ -15,7 +15,7 @@
 
 <p>
 <picture><source media="(prefers-color-scheme: dark)" srcset="assets/activity-head-dark.svg"><img src="assets/activity-head-light.svg" alt="Activity"></picture><br>
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/activity-dark.svg"><img src="assets/activity-light.svg" alt="2025-11: 37, 2025-12: 12, 2026-01: 115, 2026-02: 34, 2026-03: 44, 2026-04: 51, 2026-05: 10, 2026-06: 48, 2026-07: 33, 2026-08: 77, 2026-09: 330, 2026-10: 240"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/activity-dark.svg"><img src="assets/activity-light.svg" alt="2025-11: 37, 2025-12: 12, 2026-01: 115, 2026-02: 34, 2026-03: 44, 2026-04: 51, 2026-05: 10, 2026-06: 48, 2026-07: 33, 2026-08: 77, 2026-09: 330, 2026-10: 241"></picture>
 </p>
 
 <p>
@@ -66,7 +66,7 @@
 | 2026-07 | 33 |
 | 2026-08 | 77 |
 | 2026-09 | 330 |
-| 2026-10 | 240 |
+| 2026-10 | 241 |
 
 | Study track | Repositories |
 | --- | ---: |
