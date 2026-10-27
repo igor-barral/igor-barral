@@ -1,0 +1,12 @@
+{
+  "name": "igor-barral",
+  "private": true,
+  "type": "module",
+  "description": "GitHub profile README with the igorbarral.com.br visual identity",
+  "scripts": {
+    "build": "node src/build.mjs"
+  },
+  "devDependencies": {
+    "opentype.js": "^1.3.4"
+  }
+}
