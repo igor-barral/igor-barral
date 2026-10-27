@@ -1,12 +1,15 @@
-// Generates assets/*.svg (light and dark) and README.md from src/content.mjs.
-// GitHub strips CSS from READMEs, so the site's identity lives inside SVGs:
-// fonts are subset from Google Fonts and embedded, text is measured with
-// opentype.js so wrapping and boxes match the real glyphs.
+// Generates assets/*.svg (light and dark) and README.md from GitHub data
+// (src/data.mjs) and fixed copy (src/content.mjs).
+// GitHub strips CSS from READMEs, so the igorbarral.com.br identity lives inside
+// SVGs: fonts are subset from Google Fonts and embedded, text is measured with
+// opentype.js so wrapping and bars line up with the real glyphs.
 
 import { readFile, writeFile, mkdir, rm } from 'node:fs/promises';
 import opentype from 'opentype.js';
+import * as si from 'simple-icons';
 import * as c from './content.mjs';
 import { icons } from './icons.mjs';
+import { loadStats } from './data.mjs';
 
 const ROOT = new URL('../', import.meta.url);
 const W = 840;
@@ -24,6 +27,38 @@ const FONTS = {
   mono: { family: 'IBM Plex Mono', weight: 400 },
   monoMed: { family: 'IBM Plex Mono', weight: 500 },
 };
+
+// ---------- data ----------
+
+const stats = await loadStats();
+const today = new Date().toISOString().slice(0, 10);
+const fmt = (n) => n.toLocaleString('en-US');
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+const publicRepos = stats.repos.filter((r) => !r.isPrivate);
+const studyRepos = stats.repos.filter((r) => /-study$/.test(r.name));
+const since = new Date(stats.createdAt);
+const years = Math.floor((Date.now() - since) / (365.25 * 864e5));
+
+const langTotals = {};
+for (const [name, size] of Object.entries(stats.languages)) {
+  const key = c.languageAliases[name] ?? name;
+  langTotals[key] = (langTotals[key] ?? 0) + size;
+}
+const langSum = Object.values(langTotals).reduce((a, b) => a + b, 0);
+const langSorted = Object.entries(langTotals).sort((a, b) => b[1] - a[1]);
+const languages = langSorted.slice(0, c.topLanguages).map(([name, size]) => ({ name, share: size / langSum }));
+const otherShare = langSorted.slice(c.topLanguages).reduce((a, [, s]) => a + s, 0) / langSum;
+
+const tracks = {};
+for (const r of studyRepos) {
+  const track = r.name.match(/-([a-z]+)-study$/)?.[1];
+  if (track) tracks[track] = (tracks[track] ?? 0) + 1;
+}
+const trackRows = Object.entries(tracks).sort((a, b) => b[1] - a[1])
+  .map(([k, n]) => ({ name: c.studyTracks[k] ?? k, count: n }));
+
+const recent = publicRepos.filter((r) => !/-study$/.test(r.name) && r.name !== stats.login).slice(0, c.recentRepos);
 
 // ---------- fonts ----------
 
@@ -47,20 +82,15 @@ for (const key of Object.keys(FONTS)) {
 
 const measure = (font, size, str, ls = 0) => metrics[font].getAdvanceWidth(str, size) + ls * str.length;
 
-function wrap(font, size, str, max) {
-  const lines = [];
-  let cur = '';
-  for (const word of str.split(' ')) {
-    const next = cur ? `${cur} ${word}` : word;
-    if (cur && measure(font, size, next) > max) { lines.push(cur); cur = word; } else cur = next;
-  }
-  if (cur) lines.push(cur);
-  return lines;
+function ellipsize(font, size, str, max) {
+  if (measure(font, size, str) <= max) return str;
+  while (str && measure(font, size, `${str}…`) > max) str = str.slice(0, -1);
+  return `${str.trimEnd()}…`;
 }
 
 // ---------- svg primitives ----------
 
-const esc = (s) => s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+const esc = (s) => s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
 
 function text(font, size, x, y, str, fill, { ls = 0, anchor } = {}) {
   for (const ch of str) used[font].add(ch);
@@ -70,6 +100,12 @@ function text(font, size, x, y, str, fill, { ls = 0, anchor } = {}) {
 
 const hline = (y, x1, x2, color) => `<rect x="${x1}" y="${y}" width="${x2 - x1}" height="1" fill="${color}"/>`;
 
+// Horizontal bar with a 2px rounded data end; the baseline end stays square.
+const hbar = (x, y, w, h, fill) => w <= 0 ? '' :
+  `<path d="M${x} ${y}H${x + w - 2}Q${x + w} ${y} ${x + w} ${y + 2}V${y + h - 2}Q${x + w} ${y + h} ${x + w - 2} ${y + h}H${x}Z" fill="${fill}"/>`;
+const vbar = (x, y, w, h, fill) => h <= 0 ? '' :
+  `<path d="M${x} ${y + h}V${y + 2}Q${x} ${y} ${x + 2} ${y}H${x + w - 2}Q${x + w} ${y} ${x + w} ${y + 2}V${y + h}Z" fill="${fill}"/>`;
+
 // The "B" mark: the yellow I is the stem of the B.
 const logoMark = (x, y, h, ink) =>
   `<svg x="${x}" y="${y}" height="${h}" width="${h * 0.7}" viewBox="0 0 70 100"><rect width="16" height="100" fill="#f5c842"/><path d="M16 7H36A21.5 21.5 0 0 1 36 50H16M16 50H40A21.5 21.5 0 0 1 40 93H16" fill="none" stroke="${ink}" stroke-width="14"/></svg>`;
@@ -77,125 +113,158 @@ const logoMark = (x, y, h, ink) =>
 const icon = (name, x, y, size, fill) =>
   `<svg x="${x}" y="${y}" width="${size}" height="${size}" viewBox="0 0 24 24"><path d="${icons[name]}" fill="${fill}"/></svg>`;
 
-const logoCache = {};
-async function projectLogo(file, x, y, size, theme, t) {
-  logoCache[file] ??= await readFile(new URL(`src/logos/${file}`, ROOT), 'utf8');
-  let svg = logoCache[file];
-  if (theme === 'dark') {
-    // Dark ink would vanish on GitHub's dark background: swap ink for light,
-    // and solid dark shapes (IB Link Guard shield) become yellow with dark strokes.
-    if (svg.includes('#20221c')) svg = svg.replaceAll('#f5c842', '#111111').replaceAll('#20221c', t.accent);
-    else svg = svg.replaceAll('#111111', t.ink);
-  }
-  return svg.replace('<svg ', `<svg x="${x}" y="${y}" width="${size}" height="${size}" preserveAspectRatio="xMinYMid meet" `);
-}
-
-function tag(x, baseline, str, t) {
-  const size = 11.5, padX = 7;
-  const w = measure('monoMed', size, str) + padX * 2;
-  return {
-    w,
-    svg: `<rect x="${x}" y="${baseline - 13}" width="${w}" height="18" fill="${t.accent}"/>` +
-      text('monoMed', size, x + padX, baseline, str, t.onAccent),
-  };
+// Language icon from simple-icons in ink (identity stays monochrome); initials badge when missing.
+function langIcon(name, x, y, size, t) {
+  const ico = si[c.languageIcons[name]];
+  if (ico) return `<svg x="${x}" y="${y}" width="${size}" height="${size}" viewBox="0 0 24 24"><path d="${ico.path}" fill="${t.ink}"/></svg>`;
+  const initials = name.replace(/[^A-Za-z#+]/g, '').slice(0, 2);
+  return `<rect x="${x + 0.5}" y="${y + 0.5}" width="${size - 1}" height="${size - 1}" fill="none" stroke="${t.ink}"/>` +
+    text('monoMed', size * 0.45, x + size / 2, y + size * 0.66, initials, t.ink, { anchor: 'middle' });
 }
 
 const label = (x, y, str, t) => text('mono', 13, x, y, str.toUpperCase(), t.muted, { ls: 1.04 });
 
 // ---------- components (each returns { w, h, body }) ----------
 
-function hero(t) {
-  const { label: lab, title, text: p } = c.hero;
-  let b = logoMark(0, 14, 36, t.ink) + text('display', 20, 36, 39, 'igor barral', t.ink);
-  const host = 'igorbarral.com.br';
-  const hw = measure('mono', 13, host) + 16;
-  b += `<rect x="${W - hw - 0.5}" y="20.5" width="${hw}" height="23" fill="none" stroke="${t.ink}"/>` +
-    text('mono', 13, W - hw / 2 - 0.5, 36.5, host, t.ink, { anchor: 'middle' });
-  b += hline(64, 0, W, t.line);
-
-  b += label(0, 128, lab, t);
-  const size = 52, y1 = 196, y2 = 254;
-  b += text('display', size, 0, y1, title[0], t.ink, { ls: -1.04 });
-  const markW = measure('display', size, title[1], -1.04);
-  // Light ink over the low highlight is unreadable, so dark mode marks the whole line.
+function header(t) {
+  let b = logoMark(0, 6, 40, t.ink) + text('display', 24, 40, 36, 'igor barral', t.ink, { ls: -0.48 });
+  const [a, mark] = c.header.motto;
+  const size = 15, y = 36;
+  const markW = measure('bodyBold', size, mark);
+  const aW = measure('body', size, `${a} `);
+  const x0 = W - markW - aW;
+  b += text('body', size, x0, y, `${a} `, t.muted);
+  // Light ink over the low highlight is unreadable, so dark mode marks the whole phrase.
   const full = t.ink !== t.onAccent;
   b += full
-    ? `<rect x="-6" y="${y2 - 44}" width="${markW + 14}" height="58" fill="${t.accent}"/>`
-    : `<rect x="-2" y="${y2 - 9}" width="${markW + 6}" height="21" fill="${t.accent}"/>`;
-  b += text('display', size, 0, y2, title[1], full ? t.onAccent : t.ink, { ls: -1.04 });
-
-  let y = y2 + 52;
-  for (const line of wrap('body', 19, p, 620)) { b += text('body', 19, 0, y, line, t.muted); y += 30; }
-  return { w: W, h: y + 26, body: b };
+    ? `<rect x="${W - markW - 4}" y="${y - 15}" width="${markW + 4}" height="21" fill="${t.accent}"/>`
+    : `<rect x="${W - markW - 2}" y="${y - 4}" width="${markW + 2}" height="8" fill="${t.accent}"/>`;
+  b += text('bodyBold', size, full ? W - markW - 2 : W - markW, y, mark, full ? t.onAccent : t.ink);
+  b += hline(64, 0, W, t.line) + label(0, 100, `${c.header.label} · github overview`, t);
+  return { w: W, h: 124, body: b };
 }
 
-// "What I build": the site's two-column section (label left, list right).
-function buildList(t) {
-  const col = 170;
-  let b = hline(0, 0, W, t.line) + label(0, 58, c.build.label, t);
-  let y = 32;
-  for (const item of c.build.items) {
-    b += hline(y, col, W, t.line);
-    b += text('display', 18, col, y + 34, item.title, t.ink, { ls: -0.36 });
-    b += text('body', 16, col, y + 60, item.text, t.muted);
-    y += 82;
+function tiles(t) {
+  const items = [
+    { k: 'Repositories', v: fmt(stats.repos.length), sub: 'owned, forks excluded' },
+    { k: 'Public', v: fmt(publicRepos.length), sub: 'open on GitHub' },
+    { k: 'Private', v: fmt(stats.repos.length - publicRepos.length), sub: 'client and product work' },
+    { k: 'Contributions', v: fmt(stats.contributions), sub: `last 12 months, ${fmt(stats.privateContributions)} private` },
+    { k: 'Study repos', v: fmt(studyRepos.length), sub: `${trackRows.length} tracks, one repo per topic` },
+    { k: 'On GitHub', v: `${years} yrs`, sub: `since ${MONTHS[since.getUTCMonth()]} ${since.getUTCFullYear()}` },
+  ];
+  const gap = 12, cols = 3, tw = (W - gap * (cols - 1)) / cols, th = 116;
+  let b = '';
+  items.forEach((it, i) => {
+    const x = (i % cols) * (tw + gap), y = Math.floor(i / cols) * (th + gap);
+    b += `<rect x="${x + 0.5}" y="${y + 0.5}" width="${tw - 1}" height="${th - 1}" fill="none" stroke="${t.line}"/>`;
+    b += `<rect x="${x}" y="${y}" width="28" height="4" fill="${t.accent}"/>`;
+    b += label(x + 18, y + 32, it.k, t);
+    b += text('display', 38, x + 18, y + 76, it.v, t.ink, { ls: -0.76 });
+    b += text('body', 13.5, x + 18, y + 100, ellipsize('body', 13.5, it.sub, tw - 36), t.muted);
+  });
+  return { w: W, h: th * 2 + gap + 2, body: b };
+}
+
+function sectionHead(t, lab, title, note) {
+  let b = hline(0, 0, W, t.line) + label(0, 52, lab, t);
+  let y = 52;
+  if (title) { y += 40; b += text('display', 24, 0, y, title, t.ink, { ls: -0.48 }); }
+  if (note) { y += 30; b += text('body', 16, 0, y, note, t.muted); }
+  return { w: W, h: y + 24, body: b };
+}
+
+// Single series, so no legend: every row is direct-labeled with its value.
+function barList(t, rows, { iconFor, value, max }) {
+  const nameX = iconFor ? 32 : 0, barX = 210, valW = 64, barMax = W - barX - valW;
+  const rh = 36;
+  let b = '';
+  rows.forEach((r, i) => {
+    const y = i * rh;
+    if (iconFor) b += iconFor(r, 0, y + 7, 20);
+    b += text(r.muted ? 'body' : 'bodyBold', 15, nameX, y + 23, r.name, r.muted ? t.muted : t.ink);
+    b += hline(y + 17, barX, W - valW, t.line);
+    b += hbar(barX, y + 10, Math.max(2, (r.v / max) * barMax), 14, r.muted ? t.muted : t.ink);
+    b += text('mono', 13, W, y + 23, value(r), t.ink, { anchor: 'end' });
+  });
+  return { w: W, h: rows.length * rh + 20, body: b };
+}
+
+function languagesChart(t) {
+  const rows = languages.map((l) => ({ name: l.name, v: l.share }));
+  if (otherShare > 0) rows.push({ name: 'Other', v: otherShare, muted: true });
+  return barList(t, rows, {
+    iconFor: (r, x, y, s) => r.muted ? '' : langIcon(r.name, x, y, s, t),
+    value: (r) => `${(r.v * 100).toFixed(r.v < 0.01 ? 1 : 0)}%`,
+    max: rows[0].v,
+  });
+}
+
+function tracksChart(t) {
+  const rows = trackRows.map((r) => ({ name: r.name, v: r.count }));
+  return barList(t, rows, { value: (r) => String(r.v), max: rows[0]?.v ?? 1 });
+}
+
+function contributionsChart(t) {
+  const left = 44, top = 30, ph = 170, pw = W - left;
+  const max = Math.max(...stats.months.map(([, n]) => n), 1);
+  const step = Math.pow(10, Math.floor(Math.log10(max)));
+  const tick = [1, 2, 5, 10].map((m) => m * step).find((s) => max / s <= 4);
+  const yMax = Math.ceil(max / tick) * tick;
+  let b = '';
+  for (let v = 0; v <= yMax; v += tick) {
+    const y = top + ph - (v / yMax) * ph;
+    b += hline(Math.round(y), left, W, v === 0 ? t.muted : t.line);
+    b += text('mono', 11.5, left - 10, y + 4, fmt(v), t.muted, { anchor: 'end' });
   }
-  b += hline(y, col, W, t.line);
-  return { w: W, h: y + 40, body: b };
+  const slot = pw / stats.months.length, bw = Math.min(36, slot - 12);
+  const peak = stats.months.reduce((a, m) => (m[1] > a[1] ? m : a));
+  stats.months.forEach(([key, n], i) => {
+    const x = left + i * slot + (slot - bw) / 2, h = (n / yMax) * ph;
+    b += vbar(x, top + ph - h, bw, h, key === peak[0] ? t.accent : t.ink);
+    const [yr, mo] = key.split('-');
+    b += text('mono', 11.5, x + bw / 2, top + ph + 20, MONTHS[+mo - 1], t.muted, { anchor: 'middle' });
+    if (mo === '01' || i === 0) b += text('mono', 11.5, x + bw / 2, top + ph + 36, yr, t.muted, { anchor: 'middle' });
+    // Selective direct labels: the peak and the current month only.
+    if (key === peak[0] || i === stats.months.length - 1) {
+      b += text('monoMed', 12.5, x + bw / 2, top + ph - h - 8, fmt(n), t.ink, { anchor: 'middle' });
+    }
+  });
+  return { w: W, h: top + ph + 56, body: b };
 }
 
-function sectionHead(t, { label: lab, title, intro }) {
-  let b = hline(0, 0, W, t.line) + label(0, 58, lab, t);
-  let y = 58;
-  if (title) { y += 46; b += text('display', 26, 0, y, title, t.ink, { ls: -0.52 }); }
-  if (intro) { y += 34; b += text('body', 17, 0, y, intro, t.muted); }
-  return { w: W, h: y + 26, body: b };
-}
-
-async function row(t, theme, item) {
-  const x = 60, top = 20;
+function repoRow(t, r) {
   let b = hline(0, 0, W, t.line);
-  b += item.logo ? await projectLogo(item.logo, 0, top + 2, 40, theme, t) : icon(item.icon, 4, top + 6, 30, t.ink);
-
-  let y = top + 20;
-  b += text('display', 18, x, y, item.title, t.ink, { ls: -0.36 });
-  if (item.tag) b += tag(x + measure('display', 18, item.title, -0.36) + 10, y - 1, item.tag, t).svg;
-
-  for (const line of wrap('body', 16, item.text, W - x - 40)) { y += 26; b += text('body', 16, x, y, line, t.muted); }
-  if (item.meta) {
-    y += 24;
-    const meta = item.icon ? `${item.meta} →` : item.meta;
-    b += text('mono', 12.5, x, y, meta, t.muted);
+  const lang = r.primaryLanguage?.name;
+  const pushed = new Date(r.pushedAt);
+  const meta = `${MONTHS[pushed.getUTCMonth()]} ${pushed.getUTCFullYear()}`;
+  const right = 190;
+  b += text('display', 17, 0, 32, ellipsize('display', 17, r.name, W - right - 20), t.ink, { ls: -0.34 });
+  // Without a description the row collapses to one line: date beside the name.
+  const desc = r.description?.trim();
+  if (desc) b += text('body', 14.5, 0, 56, ellipsize('body', 14.5, desc, W - right - 20), t.muted);
+  const metaX = desc || !lang ? W : W - 150;
+  if (lang) {
+    const name = c.languageAliases[lang] ?? lang;
+    const lw = measure('mono', 12.5, name);
+    b += langIcon(name, W - lw - 26, 19, 16, t);
+    b += text('mono', 12.5, W, 32, name, t.ink, { anchor: 'end' });
   }
-  b += text('display', 20, W - 4, top + 20, '↗', t.muted, { anchor: 'end' });
-  return { w: W, h: y + 22, body: b };
+  b += text('mono', 12.5, metaX, desc ? 56 : 32, `pushed ${meta}`, t.muted, { anchor: 'end' });
+  return { w: W, h: desc ? 74 : 50, body: b };
 }
 
-// Primary button with the site's hard shadow (its hover state, frozen).
-function button(t, str) {
-  const size = 17, padX = 22;
-  const w = measure('bodyBold', size, str) + padX * 2 + 4;
-  const body = `<rect x="5" y="5" width="${w - 4}" height="50" fill="${t.ink}"/>` +
-    `<rect x="1" y="1" width="${w - 4}" height="50" fill="${t.accent}" stroke="${t.ink}" stroke-width="2"/>` +
-    text('bodyBold', size, 1 + (w - 4) / 2, 32, str, t.onAccent, { anchor: 'middle' });
-  return { w: w + 6, h: 60, body };
-}
-
-function textLink(t, str) {
-  const w = measure('bodyBold', 17, str);
-  const body = text('bodyBold', 17, 4, 32, str, t.ink) + `<rect x="4" y="38" width="${w}" height="2" fill="${t.accent}"/>`;
-  return { w: w + 8, h: 60, body };
-}
-
-function socialButton(t, { icon: name, text: str }) {
+function linkButton(t, { icon: name, text: str }) {
   const size = 15, w = 14 + 18 + 8 + measure('bodyBold', size, str) + 14;
+  const glyph = name === 'logo' ? logoMark(17, 11, 18, t.ink) : icon(name, 14.5, 11.5, 18, t.ink);
   const body = `<rect x="0.5" y="0.5" width="${w}" height="39" fill="none" stroke="${t.line}"/>` +
-    icon(name, 14.5, 11.5, 18, t.ink) + text('bodyBold', size, 40.5, 25.5, str, t.ink);
+    glyph + text('bodyBold', size, 40.5, 25.5, str, t.ink);
   return { w: w + 1, h: 41, body };
 }
 
 function foot(t) {
-  const body = hline(0, 0, W, t.line) + text('body', 14.5, 0, 40, c.footer, t.muted) +
+  const body = hline(0, 0, W, t.line) +
+    text('mono', 12.5, 0, 40, `Updated ${today} · generated from the GitHub API`, t.muted) +
     logoMark(W - 14, 25, 20, t.ink);
   return { w: W, h: 64, body };
 }
@@ -213,20 +282,19 @@ async function emit(name, render) {
   return name;
 }
 
-const heroId = await emit('hero', hero);
-const buildId = await emit('build', buildList);
-const projectsHead = await emit('projects', (t) => sectionHead(t, c.projects));
-const projectRows = [];
-for (const p of c.projects.items) projectRows.push({ ...p, file: await emit(`project-${p.id}`, (t, th) => row(t, th, p)) });
-const channelsHead = await emit('channels', (t) => sectionHead(t, c.channels));
-const channelRows = [];
-for (const ch of c.channels.items) channelRows.push({ ...ch, file: await emit(`channel-${ch.id}`, (t, th) => row(t, th, ch)) });
-const socials = [];
-for (const s of c.channels.social) socials.push({ ...s, file: await emit(`social-${s.id}`, (t) => socialButton(t, s)) });
-const contactHead = await emit('contact', (t) => sectionHead(t, c.contact));
-const contactBtn = await emit('contact-button', (t) => button(t, c.contact.button.text));
-const contactLink = await emit('contact-link', (t) => textLink(t, c.contact.link.text));
-const footId = await emit('footer', foot);
+await emit('header', header);
+await emit('tiles', tiles);
+await emit('languages-head', (t) => sectionHead(t, 'Languages', 'What the code is written in', 'Share of code across all owned repositories, public and private.'));
+await emit('languages', languagesChart);
+await emit('activity-head', (t) => sectionHead(t, 'Activity', `${fmt(stats.contributions)} contributions in the last 12 months`, 'Contributions per month, private repositories included.'));
+await emit('activity', contributionsChart);
+await emit('study-head', (t) => sectionHead(t, 'Study in public', `${studyRepos.length} study repositories`, 'One repository per topic, grouped by track.'));
+await emit('study', tracksChart);
+await emit('recent-head', (t) => sectionHead(t, 'Recently pushed', null, null));
+const recentFiles = [];
+for (const r of recent) recentFiles.push({ r, file: await emit(`repo-${r.name.toLowerCase()}`, (t) => repoRow(t, r)) });
+for (const l of c.links) await emit(`link-${l.id}`, (t) => linkButton(t, l));
+await emit('footer', foot);
 
 // Embed one subset per font, covering every glyph used across all SVGs.
 const faces = {};
@@ -252,39 +320,63 @@ for (const f of files) {
 const pic = (name, alt) =>
   `<picture><source media="(prefers-color-scheme: dark)" srcset="assets/${name}-dark.svg"><img src="assets/${name}-light.svg" alt="${esc(alt)}"></picture>`;
 const linked = (href, name, alt) => `<a href="${href}">${pic(name, alt)}</a>`;
+const pct = (v) => `${(v * 100).toFixed(1)}%`;
 
-const readme = `<!-- Generated by \`npm run build\` from src/content.mjs. Do not edit by hand. -->
+// The charts are images, so the same numbers also ship as collapsible tables.
+const readme = `<!-- Generated by \`npm run build\` from the GitHub API and src/content.mjs. Do not edit by hand. -->
 
 <p>
-${linked(c.site, heroId, `Igor Barral. ${c.hero.label}. ${c.hero.title.join(' ')} ${c.hero.text}`)}
+${linked(c.site, 'header', `Igor Barral. ${c.header.label}. ${c.header.motto.join(' ')}`)}
 </p>
 
 <p>
-${pic(buildId, `${c.build.label}: ${c.build.items.map((i) => `${i.title}, ${i.text}`).join(' ')}`)}
+${pic('tiles', `${stats.repos.length} repositories: ${publicRepos.length} public, ${stats.repos.length - publicRepos.length} private. ${stats.contributions} contributions in the last 12 months. ${studyRepos.length} study repositories. ${years} years on GitHub.`)}
 </p>
 
 <p>
-${pic(projectsHead, c.projects.label)}<br>
-${projectRows.map((p) => linked(p.href, p.file, `${p.title}: ${p.text}`)).join('<br>\n')}
+${pic('languages-head', 'Languages')}<br>
+${pic('languages', languages.map((l) => `${l.name} ${pct(l.share)}`).join(', '))}
 </p>
 
 <p>
-${pic(channelsHead, `${c.channels.title}. ${c.channels.intro}`)}<br>
-${channelRows.map((ch) => linked(ch.href, ch.file, `YouTube ${ch.title} (${ch.meta}): ${ch.text}`)).join('<br>\n')}
+${pic('activity-head', 'Activity')}<br>
+${pic('activity', stats.months.map(([k, n]) => `${k}: ${n}`).join(', '))}
 </p>
 
 <p>
-${socials.map((s) => linked(s.href, s.file, s.text)).join('&nbsp;\n')}
+${pic('study-head', 'Study in public')}<br>
+${pic('study', trackRows.map((r) => `${r.name}: ${r.count}`).join(', '))}
 </p>
 
 <p>
-${pic(contactHead, `${c.contact.title} ${c.contact.intro}`)}<br>
-${linked(c.contact.button.href, contactBtn, c.contact.button.text)}&nbsp;&nbsp;
-${linked(c.contact.link.href, contactLink, c.contact.link.text)}
+${pic('recent-head', 'Recently pushed')}<br>
+${recentFiles.map(({ r, file }) => linked(r.url, file, `${r.name}: ${r.description ?? ''}`)).join('<br>\n')}
 </p>
 
 <p>
-${pic(footId, c.footer)}
+${c.links.map((l) => linked(l.href, `link-${l.id}`, l.text)).join('&nbsp;\n')}
+</p>
+
+<details>
+<summary>Data as tables</summary>
+
+| Language | Share |
+| --- | ---: |
+${languages.map((l) => `| ${l.name} | ${pct(l.share)} |`).join('\n')}
+${otherShare > 0 ? `| Other | ${pct(otherShare)} |` : ''}
+
+| Month | Contributions |
+| --- | ---: |
+${stats.months.map(([k, n]) => `| ${k} | ${n} |`).join('\n')}
+
+| Study track | Repositories |
+| --- | ---: |
+${trackRows.map((r) => `| ${r.name} | ${r.count} |`).join('\n')}
+
+</details>
+
+<p>
+${pic('footer', `Updated ${today}`)}
 </p>
 `;
 
