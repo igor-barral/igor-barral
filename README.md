@@ -5,22 +5,22 @@
 </p>
 
 <p>
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/tiles-dark.svg"><img src="assets/tiles-light.svg" alt="201 repositories: 78 public, 123 private. 1048 contributions in the last 12 months. 49 study repositories. 7 years on GitHub."></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/tiles-dark.svg"><img src="assets/tiles-light.svg" alt="201 repositories: 78 public, 123 private. 1026 contributions in the last 12 months. 50 study repositories. 7 years on GitHub."></picture>
 </p>
 
 <p>
 <picture><source media="(prefers-color-scheme: dark)" srcset="assets/languages-head-dark.svg"><img src="assets/languages-head-light.svg" alt="Languages"></picture><br>
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/languages-dark.svg"><img src="assets/languages-light.svg" alt="PHP 47.4%, JavaScript 18.1%, TypeScript 13.9%, Blade 8.8%, Vue 4.0%, CSS 3.2%, Java 3.2%, HTML 1.0%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/languages-dark.svg"><img src="assets/languages-light.svg" alt="PHP 47.4%, JavaScript 18.1%, TypeScript 13.9%, Blade 8.8%, Vue 4.0%, Java 3.2%, CSS 3.2%, HTML 0.9%"></picture>
 </p>
 
 <p>
 <picture><source media="(prefers-color-scheme: dark)" srcset="assets/activity-head-dark.svg"><img src="assets/activity-head-light.svg" alt="Activity"></picture><br>
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/activity-dark.svg"><img src="assets/activity-light.svg" alt="2025-11: 37, 2025-12: 12, 2026-01: 115, 2026-02: 34, 2026-03: 44, 2026-04: 51, 2026-05: 10, 2026-06: 48, 2026-07: 33, 2026-08: 77, 2026-09: 330, 2026-10: 241"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/activity-dark.svg"><img src="assets/activity-light.svg" alt="2025-11: 37, 2025-12: 12, 2026-01: 115, 2026-02: 13, 2026-03: 41, 2026-04: 51, 2026-05: 9, 2026-06: 48, 2026-07: 33, 2026-08: 77, 2026-09: 330, 2026-10: 244"></picture>
 </p>
 
 <p>
 <picture><source media="(prefers-color-scheme: dark)" srcset="assets/study-head-dark.svg"><img src="assets/study-head-light.svg" alt="Study in public"></picture><br>
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/study-dark.svg"><img src="assets/study-light.svg" alt="SAP ERP: 18, Software architecture: 8, Performance: 8, Languages: 5, DevOps: 5, Frameworks: 3, Security: 1, Databases: 1"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/study-dark.svg"><img src="assets/study-light.svg" alt="SAP ERP: 18, Software architecture: 8, Performance: 8, Languages: 5, DevOps: 5, Frameworks: 3, Databases: 2, Security: 1"></picture>
 </p>
 
 <p>
@@ -48,25 +48,25 @@
 | TypeScript | 13.9% |
 | Blade | 8.8% |
 | Vue | 4.0% |
-| CSS | 3.2% |
 | Java | 3.2% |
-| HTML | 1.0% |
-| Other | 0.5% |
+| CSS | 3.2% |
+| HTML | 0.9% |
+| Other | 0.4% |
 
 | Month | Contributions |
 | --- | ---: |
 | 2025-11 | 37 |
 | 2025-12 | 12 |
 | 2026-01 | 115 |
-| 2026-02 | 34 |
-| 2026-03 | 44 |
+| 2026-02 | 13 |
+| 2026-03 | 41 |
 | 2026-04 | 51 |
-| 2026-05 | 10 |
+| 2026-05 | 9 |
 | 2026-06 | 48 |
 | 2026-07 | 33 |
 | 2026-08 | 77 |
 | 2026-09 | 330 |
-| 2026-10 | 241 |
+| 2026-10 | 244 |
 
 | Study track | Repositories |
 | --- | ---: |
@@ -76,11 +76,11 @@
 | Languages | 5 |
 | DevOps | 5 |
 | Frameworks | 3 |
+| Databases | 2 |
 | Security | 1 |
-| Databases | 1 |
 
 </details>
 
 <p>
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/footer-dark.svg"><img src="assets/footer-light.svg" alt="Updated 2026-10-27"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/footer-dark.svg"><img src="assets/footer-light.svg" alt="Updated 2026-10-28"></picture>
 </p>
