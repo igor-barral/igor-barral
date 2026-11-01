@@ -15,7 +15,7 @@
 
 <p>
 <picture><source media="(prefers-color-scheme: dark)" srcset="assets/activity-head-dark.svg"><img src="assets/activity-head-light.svg" alt="Activity"></picture><br>
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/activity-dark.svg"><img src="assets/activity-light.svg" alt="2025-11: 37, 2025-12: 12, 2026-01: 115, 2026-02: 13, 2026-03: 41, 2026-04: 49, 2026-05: 9, 2026-06: 48, 2026-07: 33, 2026-08: 77, 2026-09: 330, 2026-10: 254"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/activity-dark.svg"><img src="assets/activity-light.svg" alt="2025-12: 12, 2026-01: 115, 2026-02: 13, 2026-03: 41, 2026-04: 49, 2026-05: 9, 2026-06: 48, 2026-07: 33, 2026-08: 77, 2026-09: 330, 2026-10: 254, 2026-11: 0"></picture>
 </p>
 
 <p>
@@ -55,7 +55,6 @@
 
 | Month | Contributions |
 | --- | ---: |
-| 2025-11 | 37 |
 | 2025-12 | 12 |
 | 2026-01 | 115 |
 | 2026-02 | 13 |
@@ -67,6 +66,7 @@
 | 2026-08 | 77 |
 | 2026-09 | 330 |
 | 2026-10 | 254 |
+| 2026-11 | 0 |
 
 | Study track | Repositories |
 | --- | ---: |
@@ -82,5 +82,5 @@
 </details>
 
 <p>
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/footer-dark.svg"><img src="assets/footer-light.svg" alt="Updated 2026-10-31"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/footer-dark.svg"><img src="assets/footer-light.svg" alt="Updated 2026-11-01"></picture>
 </p>
