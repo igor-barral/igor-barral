@@ -5,7 +5,7 @@
 </p>
 
 <p>
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/tiles-dark.svg"><img src="assets/tiles-light.svg" alt="203 repositories: 80 public, 123 private. 1034 contributions in the last 12 months. 52 study repositories. 7 years on GitHub."></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/tiles-dark.svg"><img src="assets/tiles-light.svg" alt="203 repositories: 80 public, 123 private. 1008 contributions in the last 12 months. 52 study repositories. 7 years on GitHub."></picture>
 </p>
 
 <p>
@@ -82,5 +82,5 @@
 </details>
 
 <p>
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/footer-dark.svg"><img src="assets/footer-light.svg" alt="Updated 2026-11-01"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/footer-dark.svg"><img src="assets/footer-light.svg" alt="Updated 2026-11-02"></picture>
 </p>
