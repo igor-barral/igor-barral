@@ -5,7 +5,7 @@
 </p>
 
 <p>
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/tiles-dark.svg"><img src="assets/tiles-light.svg" alt="208 repositories: 85 public, 123 private. 1045 contributions in the last 12 months. 57 study repositories. 7 years on GitHub."></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/tiles-dark.svg"><img src="assets/tiles-light.svg" alt="209 repositories: 86 public, 123 private. 1058 contributions in the last 12 months. 58 study repositories. 7 years on GitHub."></picture>
 </p>
 
 <p>
@@ -15,12 +15,12 @@
 
 <p>
 <picture><source media="(prefers-color-scheme: dark)" srcset="assets/activity-head-dark.svg"><img src="assets/activity-head-light.svg" alt="Activity"></picture><br>
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/activity-dark.svg"><img src="assets/activity-light.svg" alt="2025-12: 12, 2026-01: 115, 2026-02: 13, 2026-03: 41, 2026-04: 49, 2026-05: 7, 2026-06: 45, 2026-07: 33, 2026-08: 77, 2026-09: 330, 2026-10: 254, 2026-11: 47"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/activity-dark.svg"><img src="assets/activity-light.svg" alt="2025-12: 12, 2026-01: 115, 2026-02: 13, 2026-03: 41, 2026-04: 49, 2026-05: 7, 2026-06: 44, 2026-07: 33, 2026-08: 77, 2026-09: 330, 2026-10: 254, 2026-11: 61"></picture>
 </p>
 
 <p>
 <picture><source media="(prefers-color-scheme: dark)" srcset="assets/study-head-dark.svg"><img src="assets/study-head-light.svg" alt="Study in public"></picture><br>
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/study-dark.svg"><img src="assets/study-light.svg" alt="SAP ERP: 18, Software architecture: 12, Performance: 8, Databases: 5, Languages: 5, DevOps: 5, Frameworks: 3, Security: 1"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/study-dark.svg"><img src="assets/study-light.svg" alt="SAP ERP: 18, Software architecture: 12, Performance: 8, DevOps: 6, Databases: 5, Languages: 5, Frameworks: 3, Security: 1"></picture>
 </p>
 
 <p>
@@ -61,26 +61,26 @@
 | 2026-03 | 41 |
 | 2026-04 | 49 |
 | 2026-05 | 7 |
-| 2026-06 | 45 |
+| 2026-06 | 44 |
 | 2026-07 | 33 |
 | 2026-08 | 77 |
 | 2026-09 | 330 |
 | 2026-10 | 254 |
-| 2026-11 | 47 |
+| 2026-11 | 61 |
 
 | Study track | Repositories |
 | --- | ---: |
 | SAP ERP | 18 |
 | Software architecture | 12 |
 | Performance | 8 |
+| DevOps | 6 |
 | Databases | 5 |
 | Languages | 5 |
-| DevOps | 5 |
 | Frameworks | 3 |
 | Security | 1 |
 
 </details>
 
 <p>
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/footer-dark.svg"><img src="assets/footer-light.svg" alt="Updated 2026-11-09"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/footer-dark.svg"><img src="assets/footer-light.svg" alt="Updated 2026-11-10"></picture>
 </p>
