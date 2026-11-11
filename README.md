@@ -5,17 +5,17 @@
 </p>
 
 <p>
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/tiles-dark.svg"><img src="assets/tiles-light.svg" alt="209 repositories: 86 public, 123 private. 1058 contributions in the last 12 months. 58 study repositories. 7 years on GitHub."></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/tiles-dark.svg"><img src="assets/tiles-light.svg" alt="210 repositories: 87 public, 123 private. 1060 contributions in the last 12 months. 58 study repositories. 7 years on GitHub."></picture>
 </p>
 
 <p>
 <picture><source media="(prefers-color-scheme: dark)" srcset="assets/languages-head-dark.svg"><img src="assets/languages-head-light.svg" alt="Languages"></picture><br>
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/languages-dark.svg"><img src="assets/languages-light.svg" alt="PHP 47.4%, JavaScript 18.1%, TypeScript 13.9%, Blade 8.8%, Vue 4.0%, Java 3.2%, CSS 3.2%, HTML 0.9%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/languages-dark.svg"><img src="assets/languages-light.svg" alt="PHP 47.3%, JavaScript 18.0%, TypeScript 13.9%, Blade 8.7%, Vue 4.0%, Java 3.2%, CSS 3.2%, HTML 0.9%"></picture>
 </p>
 
 <p>
 <picture><source media="(prefers-color-scheme: dark)" srcset="assets/activity-head-dark.svg"><img src="assets/activity-head-light.svg" alt="Activity"></picture><br>
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/activity-dark.svg"><img src="assets/activity-light.svg" alt="2025-12: 12, 2026-01: 115, 2026-02: 13, 2026-03: 41, 2026-04: 49, 2026-05: 7, 2026-06: 44, 2026-07: 33, 2026-08: 77, 2026-09: 330, 2026-10: 254, 2026-11: 61"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/activity-dark.svg"><img src="assets/activity-light.svg" alt="2025-12: 12, 2026-01: 115, 2026-02: 13, 2026-03: 41, 2026-04: 49, 2026-05: 7, 2026-06: 43, 2026-07: 33, 2026-08: 77, 2026-09: 330, 2026-10: 254, 2026-11: 64"></picture>
 </p>
 
 <p>
@@ -25,11 +25,11 @@
 
 <p>
 <picture><source media="(prefers-color-scheme: dark)" srcset="assets/recent-head-dark.svg"><img src="assets/recent-head-light.svg" alt="Recently pushed"></picture><br>
+<a href="https://github.com/igor-barral/sap-freight-calculation-case"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/repo-sap-freight-calculation-case-dark.svg"><img src="assets/repo-sap-freight-calculation-case-light.svg" alt="sap-freight-calculation-case: "></picture></a><br>
 <a href="https://github.com/igor-barral/SAP-Study-Road-Map"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/repo-sap-study-road-map-dark.svg"><img src="assets/repo-sap-study-road-map-light.svg" alt="SAP-Study-Road-Map: "></picture></a><br>
 <a href="https://github.com/igor-barral/Software-Engineering-Study-Road-Map"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/repo-software-engineering-study-road-map-dark.svg"><img src="assets/repo-software-engineering-study-road-map-light.svg" alt="Software-Engineering-Study-Road-Map: "></picture></a><br>
 <a href="https://github.com/igor-barral/php-turbo-admin"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/repo-php-turbo-admin-dark.svg"><img src="assets/repo-php-turbo-admin-light.svg" alt="php-turbo-admin: "></picture></a><br>
-<a href="https://github.com/igor-barral/canais-pipeline-site"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/repo-canais-pipeline-site-dark.svg"><img src="assets/repo-canais-pipeline-site-light.svg" alt="canais-pipeline-site: "></picture></a><br>
-<a href="https://github.com/igor-barral/languages-center-doc-notebook-lm"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/repo-languages-center-doc-notebook-lm-dark.svg"><img src="assets/repo-languages-center-doc-notebook-lm-light.svg" alt="languages-center-doc-notebook-lm: "></picture></a>
+<a href="https://github.com/igor-barral/canais-pipeline-site"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/repo-canais-pipeline-site-dark.svg"><img src="assets/repo-canais-pipeline-site-light.svg" alt="canais-pipeline-site: "></picture></a>
 </p>
 
 <p>
@@ -43,15 +43,15 @@
 
 | Language | Share |
 | --- | ---: |
-| PHP | 47.4% |
-| JavaScript | 18.1% |
+| PHP | 47.3% |
+| JavaScript | 18.0% |
 | TypeScript | 13.9% |
-| Blade | 8.8% |
+| Blade | 8.7% |
 | Vue | 4.0% |
 | Java | 3.2% |
 | CSS | 3.2% |
 | HTML | 0.9% |
-| Other | 0.5% |
+| Other | 0.6% |
 
 | Month | Contributions |
 | --- | ---: |
@@ -61,12 +61,12 @@
 | 2026-03 | 41 |
 | 2026-04 | 49 |
 | 2026-05 | 7 |
-| 2026-06 | 44 |
+| 2026-06 | 43 |
 | 2026-07 | 33 |
 | 2026-08 | 77 |
 | 2026-09 | 330 |
 | 2026-10 | 254 |
-| 2026-11 | 61 |
+| 2026-11 | 64 |
 
 | Study track | Repositories |
 | --- | ---: |
@@ -82,5 +82,5 @@
 </details>
 
 <p>
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/footer-dark.svg"><img src="assets/footer-light.svg" alt="Updated 2026-11-10"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/footer-dark.svg"><img src="assets/footer-light.svg" alt="Updated 2026-11-11"></picture>
 </p>
