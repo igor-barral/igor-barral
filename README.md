@@ -5,7 +5,7 @@
 </p>
 
 <p>
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/tiles-dark.svg"><img src="assets/tiles-light.svg" alt="211 repositories: 88 public, 123 private. 1068 contributions in the last 12 months. 59 study repositories. 7 years on GitHub."></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/tiles-dark.svg"><img src="assets/tiles-light.svg" alt="212 repositories: 89 public, 123 private. 1070 contributions in the last 12 months. 60 study repositories. 7 years on GitHub."></picture>
 </p>
 
 <p>
@@ -15,12 +15,12 @@
 
 <p>
 <picture><source media="(prefers-color-scheme: dark)" srcset="assets/activity-head-dark.svg"><img src="assets/activity-head-light.svg" alt="Activity"></picture><br>
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/activity-dark.svg"><img src="assets/activity-light.svg" alt="2025-12: 12, 2026-01: 115, 2026-02: 13, 2026-03: 41, 2026-04: 49, 2026-05: 7, 2026-06: 42, 2026-07: 33, 2026-08: 77, 2026-09: 330, 2026-10: 254, 2026-11: 73"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/activity-dark.svg"><img src="assets/activity-light.svg" alt="2025-12: 12, 2026-01: 115, 2026-02: 13, 2026-03: 41, 2026-04: 49, 2026-05: 7, 2026-06: 41, 2026-07: 33, 2026-08: 77, 2026-09: 330, 2026-10: 254, 2026-11: 76"></picture>
 </p>
 
 <p>
 <picture><source media="(prefers-color-scheme: dark)" srcset="assets/study-head-dark.svg"><img src="assets/study-head-light.svg" alt="Study in public"></picture><br>
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/study-dark.svg"><img src="assets/study-light.svg" alt="SAP ERP: 18, Software architecture: 12, Performance: 8, Databases: 6, DevOps: 6, Languages: 5, Frameworks: 3, Security: 1"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/study-dark.svg"><img src="assets/study-light.svg" alt="SAP ERP: 18, Software architecture: 12, Performance: 8, Databases: 7, DevOps: 6, Languages: 5, Frameworks: 3, Security: 1"></picture>
 </p>
 
 <p>
@@ -51,7 +51,7 @@
 | Java | 3.2% |
 | CSS | 3.2% |
 | HTML | 0.9% |
-| Other | 0.6% |
+| Other | 0.7% |
 
 | Month | Contributions |
 | --- | ---: |
@@ -61,19 +61,19 @@
 | 2026-03 | 41 |
 | 2026-04 | 49 |
 | 2026-05 | 7 |
-| 2026-06 | 42 |
+| 2026-06 | 41 |
 | 2026-07 | 33 |
 | 2026-08 | 77 |
 | 2026-09 | 330 |
 | 2026-10 | 254 |
-| 2026-11 | 73 |
+| 2026-11 | 76 |
 
 | Study track | Repositories |
 | --- | ---: |
 | SAP ERP | 18 |
 | Software architecture | 12 |
 | Performance | 8 |
-| Databases | 6 |
+| Databases | 7 |
 | DevOps | 6 |
 | Languages | 5 |
 | Frameworks | 3 |
@@ -82,5 +82,5 @@
 </details>
 
 <p>
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/footer-dark.svg"><img src="assets/footer-light.svg" alt="Updated 2026-11-12"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/footer-dark.svg"><img src="assets/footer-light.svg" alt="Updated 2026-11-13"></picture>
 </p>
