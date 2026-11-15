@@ -82,5 +82,5 @@
 </details>
 
 <p>
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/footer-dark.svg"><img src="assets/footer-light.svg" alt="Updated 2026-11-14"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/footer-dark.svg"><img src="assets/footer-light.svg" alt="Updated 2026-11-15"></picture>
 </p>
