@@ -24,7 +24,8 @@ const REPOS = `query($after: String) { viewer { repositories(first: 100, after: 
 
 const PROFILE = `{ viewer { login createdAt
   contributionsCollection { totalCommitContributions restrictedContributionsCount totalPullRequestContributions
-    contributionCalendar { totalContributions weeks { contributionDays { date contributionCount } } } }
+    totalIssueContributions totalPullRequestReviewContributions
+    contributionCalendar { totalContributions weeks { contributionDays { date contributionCount weekday } } } }
 } }`;
 
 export async function loadStats() {
@@ -54,6 +55,11 @@ export async function loadStats() {
     repos,
     languages,
     // The calendar spans a year plus the current partial week, so keep the last 12 months.
+    weeks: cc.contributionCalendar.weeks.map((w) => w.contributionDays),
+    commits: cc.totalCommitContributions,
+    pullRequests: cc.totalPullRequestContributions,
+    reviews: cc.totalPullRequestReviewContributions,
+    issues: cc.totalIssueContributions,
     months: Object.entries(months).sort(([a], [b]) => a.localeCompare(b)).slice(-12),
     contributions: cc.contributionCalendar.totalContributions,
     privateContributions: cc.restrictedContributionsCount,

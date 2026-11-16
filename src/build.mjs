@@ -16,8 +16,10 @@ const W = 840;
 
 // Same tokens as igorbarral.com.br/style.css; dark is derived for GitHub's dark theme.
 const themes = {
-  light: { ink: '#111111', muted: '#5f6362', line: '#e6e6e6', accent: '#f5c842', onAccent: '#111111' },
-  dark: { ink: '#ececea', muted: '#9da3a1', line: '#30363d', accent: '#f5c842', onAccent: '#111111' },
+  light: { ink: '#111111', muted: '#5f6362', line: '#e3e4e2', panel: '#ffffff', track: '#efefed', accent: '#f5c842', onAccent: '#111111',
+    heat: ['#efefed', '#fbe9a8', '#f5c842', '#d19e12', '#7a5a00'] },
+  dark: { ink: '#ececea', muted: '#9da3a1', line: '#30363d', panel: '#0d1117', track: '#21262d', accent: '#f5c842', onAccent: '#111111',
+    heat: ['#1c2128', '#4a3c10', '#8a6c18', '#c99e2a', '#f5c842'] },
 };
 
 const FONTS = {
@@ -57,6 +59,20 @@ for (const r of studyRepos) {
 }
 const trackRows = Object.entries(tracks).sort((a, b) => b[1] - a[1])
   .map(([k, n]) => ({ name: c.studyTracks[k] ?? k, count: n }));
+
+const days = stats.weeks.flat();
+const activeDays = days.filter((d) => d.contributionCount).length;
+const top = days.reduce((a, d) => (d.contributionCount > a.contributionCount ? d : a), days[0]);
+const busiest = (([y, m, d]) => `${MONTHS[+m - 1]} ${+d}, ${y}`)(top.date.split('-'));
+const streak = { current: 0, longest: 0 };
+{
+  let run = 0;
+  for (const d of days) { run = d.contributionCount ? run + 1 : 0; streak.longest = Math.max(streak.longest, run); }
+  // Today without contributions yet doesn't break the streak.
+  let i = days.length - 1;
+  if (!days[i].contributionCount) i--;
+  while (i >= 0 && days[i].contributionCount) { streak.current++; i--; }
+}
 
 const recent = publicRepos.filter((r) => !/-study$/.test(r.name) && r.name !== stats.login).slice(0, c.recentRepos);
 
@@ -122,151 +138,157 @@ function langIcon(name, x, y, size, t) {
     text('monoMed', size * 0.45, x + size / 2, y + size * 0.66, initials, t.ink, { anchor: 'middle' });
 }
 
-const label = (x, y, str, t) => text('mono', 13, x, y, str.toUpperCase(), t.muted, { ls: 1.04 });
+const label = (x, y, str, t) => text('monoMed', 12.5, x, y, str.toUpperCase(), t.ink, { ls: 1.1 });
 
 // ---------- components (each returns { w, h, body }) ----------
 
-function header(t) {
-  let b = logoMark(0, 6, 40, t.ink) + text('display', 24, 40, 36, 'igor barral', t.ink, { ls: -0.48 });
-  const [a, mark] = c.header.motto;
-  const size = 15, y = 36;
-  const markW = measure('bodyBold', size, mark);
-  const aW = measure('body', size, `${a} `);
-  const x0 = W - markW - aW;
-  b += text('body', size, x0, y, `${a} `, t.muted);
-  // Light ink over the low highlight is unreadable, so dark mode marks the whole phrase.
-  const full = t.ink !== t.onAccent;
-  b += full
-    ? `<rect x="${W - markW - 4}" y="${y - 15}" width="${markW + 4}" height="21" fill="${t.accent}"/>`
-    : `<rect x="${W - markW - 2}" y="${y - 4}" width="${markW + 2}" height="8" fill="${t.accent}"/>`;
-  b += text('bodyBold', size, full ? W - markW - 2 : W - markW, y, mark, full ? t.onAccent : t.ink);
-  b += hline(64, 0, W, t.line) + label(0, 100, `${c.header.label} · github overview`, t);
-  return { w: W, h: 124, body: b };
+const R = 10, PAD = 24;
+const panel = (t, h, w = W) =>
+  `<rect x="0.5" y="0.5" width="${w - 1}" height="${h - 1}" rx="${R}" fill="${t.panel}" stroke="${t.line}"/>`;
+// Panel title: small yellow tick + mono caps, optional right-aligned note.
+function panelTitle(t, str, note, w = W) {
+  let b = `<rect x="${PAD}" y="${PAD + 1}" width="3" height="12" fill="${t.accent}"/>` + label(PAD + 12, PAD + 12, str, t);
+  if (note) b += text('mono', 12.5, w - PAD, PAD + 12, note, t.muted, { anchor: 'end' });
+  return b;
 }
 
-function tiles(t) {
+function header(t) {
+  const h = 92;
+  let b = logoMark(0, 18, 50, t.ink);
+  b += text('display', 30, 52, 50, stats.login, t.ink, { ls: -0.6 });
+  b += text('mono', 13, 54, 74, `github.com/${stats.login} · on GitHub since ${MONTHS[since.getUTCMonth()]} ${since.getUTCFullYear()}`, t.muted);
+  const pill = `updated ${today}`, pw = measure('mono', 12, pill) + 38;
+  b += `<rect x="${W - pw + 0.5}" y="29.5" width="${pw - 1}" height="27" rx="13.5" fill="none" stroke="${t.line}"/>`;
+  b += `<circle cx="${W - pw + 13}" cy="43" r="3.5" fill="${t.accent}"/>`;
+  b += text('mono', 12, W - 12, 47, pill, t.muted, { anchor: 'end' });
+  return { w: W, h, body: b };
+}
+
+function statGrid(t) {
   const items = [
-    { k: 'Repositories', v: fmt(stats.repos.length), sub: 'owned, forks excluded' },
-    { k: 'Public', v: fmt(publicRepos.length), sub: 'open on GitHub' },
-    { k: 'Private', v: fmt(stats.repos.length - publicRepos.length), sub: 'client and product work' },
-    { k: 'Contributions', v: fmt(stats.contributions), sub: `last 12 months, ${fmt(stats.privateContributions)} private` },
-    { k: 'Study repos', v: fmt(studyRepos.length), sub: `${trackRows.length} tracks, one repo per topic` },
+    { k: 'Contributions', v: fmt(stats.contributions), sub: `last 12 months` },
+    { k: 'Commits', v: fmt(stats.commits), sub: `public, +${fmt(stats.privateContributions)} private` },
+    { k: 'Active days', v: fmt(activeDays), sub: `of the last ${days.length}` },
+    { k: 'Repositories', v: fmt(stats.repos.length), sub: `${publicRepos.length} public · ${stats.repos.length - publicRepos.length} private` },
+    { k: 'Current streak', v: `${streak.current}d`, sub: streak.current ? 'consecutive days' : 'starts today' },
+    { k: 'Longest streak', v: `${streak.longest}d`, sub: 'last 12 months' },
+    { k: 'Study repos', v: fmt(studyRepos.length), sub: `${trackRows.length} tracks, one per topic` },
     { k: 'On GitHub', v: `${years} yrs`, sub: `since ${MONTHS[since.getUTCMonth()]} ${since.getUTCFullYear()}` },
   ];
-  const gap = 12, cols = 3, tw = (W - gap * (cols - 1)) / cols, th = 116;
+  const cols = 4, cw = (W - PAD * 2) / cols, rh = 92, top = 54;
   let b = '';
   items.forEach((it, i) => {
-    const x = (i % cols) * (tw + gap), y = Math.floor(i / cols) * (th + gap);
-    b += `<rect x="${x + 0.5}" y="${y + 0.5}" width="${tw - 1}" height="${th - 1}" fill="none" stroke="${t.line}"/>`;
-    b += `<rect x="${x}" y="${y}" width="28" height="4" fill="${t.accent}"/>`;
-    b += label(x + 18, y + 32, it.k, t);
-    b += text('display', 38, x + 18, y + 76, it.v, t.ink, { ls: -0.76 });
-    b += text('body', 13.5, x + 18, y + 100, ellipsize('body', 13.5, it.sub, tw - 36), t.muted);
+    const col = i % cols, row = Math.floor(i / cols);
+    const x = PAD + col * cw, y = top + row * rh;
+    if (col) b += `<rect x="${x - 0.5}" y="${y + 6}" width="1" height="${rh - 22}" fill="${t.line}"/>`;
+    const ix = x + (col ? 18 : 0);
+    b += text('mono', 11.5, ix, y + 18, it.k.toUpperCase(), t.muted, { ls: 0.9 });
+    b += text('display', 32, ix, y + 54, it.v, t.ink, { ls: -0.64 });
+    b += text('body', 13, ix, y + 74, ellipsize('body', 13, it.sub, cw - 24), t.muted);
   });
-  return { w: W, h: th * 2 + gap + 2, body: b };
+  b += hline(top + rh - 6, PAD, W - PAD, t.line);
+  const h = top + rh * 2 + 10;
+  return { w: W, h, body: panel(t, h) + panelTitle(t, 'Overview') + b };
 }
 
-function sectionHead(t, lab, title, note) {
-  let b = hline(0, 0, W, t.line) + label(0, 52, lab, t);
-  let y = 52;
-  if (title) { y += 40; b += text('display', 24, 0, y, title, t.ink, { ls: -0.48 }); }
-  if (note) { y += 30; b += text('body', 16, 0, y, note, t.muted); }
-  return { w: W, h: y + 24, body: b };
-}
-
-// Single series, so no legend: every row is direct-labeled with its value.
-function barList(t, rows, { iconFor, value, max }) {
-  const nameX = iconFor ? 32 : 0, barX = 210, valW = 64, barMax = W - barX - valW;
-  const rh = 36;
+function heatmap(t) {
+  const cell = 11, gap = 3, step = cell + gap, left = PAD + 32, top = 76;
+  const weeks = stats.weeks;
+  const gridW = weeks.length * step - gap;
+  const x0 = left + (W - PAD - left - gridW);
   let b = '';
-  rows.forEach((r, i) => {
-    const y = i * rh;
-    if (iconFor) b += iconFor(r, 0, y + 7, 20);
-    b += text(r.muted ? 'body' : 'bodyBold', 15, nameX, y + 23, r.name, r.muted ? t.muted : t.ink);
-    b += hline(y + 17, barX, W - valW, t.line);
-    b += hbar(barX, y + 10, Math.max(2, (r.v / max) * barMax), 14, r.muted ? t.muted : t.ink);
-    b += text('mono', 13, W, y + 23, value(r), t.ink, { anchor: 'end' });
-  });
-  return { w: W, h: rows.length * rh + 20, body: b };
-}
-
-function languagesChart(t) {
-  const rows = languages.map((l) => ({ name: l.name, v: l.share }));
-  if (otherShare > 0) rows.push({ name: 'Other', v: otherShare, muted: true });
-  return barList(t, rows, {
-    iconFor: (r, x, y, s) => r.muted ? '' : langIcon(r.name, x, y, s, t),
-    value: (r) => `${(r.v * 100).toFixed(r.v < 0.01 ? 1 : 0)}%`,
-    max: rows[0].v,
-  });
-}
-
-function tracksChart(t) {
-  const rows = trackRows.map((r) => ({ name: r.name, v: r.count }));
-  return barList(t, rows, { value: (r) => String(r.v), max: rows[0]?.v ?? 1 });
-}
-
-function contributionsChart(t) {
-  const left = 44, top = 30, ph = 170, pw = W - left;
-  const max = Math.max(...stats.months.map(([, n]) => n), 1);
-  const step = Math.pow(10, Math.floor(Math.log10(max)));
-  const tick = [1, 2, 5, 10].map((m) => m * step).find((s) => max / s <= 4);
-  const yMax = Math.ceil(max / tick) * tick;
-  let b = '';
-  for (let v = 0; v <= yMax; v += tick) {
-    const y = top + ph - (v / yMax) * ph;
-    b += hline(Math.round(y), left, W, v === 0 ? t.muted : t.line);
-    b += text('mono', 11.5, left - 10, y + 4, fmt(v), t.muted, { anchor: 'end' });
-  }
-  const slot = pw / stats.months.length, bw = Math.min(36, slot - 12);
-  const peak = stats.months.reduce((a, m) => (m[1] > a[1] ? m : a));
-  stats.months.forEach(([key, n], i) => {
-    const x = left + i * slot + (slot - bw) / 2, h = (n / yMax) * ph;
-    b += vbar(x, top + ph - h, bw, h, key === peak[0] ? t.accent : t.ink);
-    const [yr, mo] = key.split('-');
-    b += text('mono', 11.5, x + bw / 2, top + ph + 20, MONTHS[+mo - 1], t.muted, { anchor: 'middle' });
-    if (mo === '01' || i === 0) b += text('mono', 11.5, x + bw / 2, top + ph + 36, yr, t.muted, { anchor: 'middle' });
-    // Selective direct labels: the peak and the current month only.
-    if (key === peak[0] || i === stats.months.length - 1) {
-      b += text('monoMed', 12.5, x + bw / 2, top + ph - h - 8, fmt(n), t.ink, { anchor: 'middle' });
+  const max = Math.max(...days.map((d) => d.contributionCount), 1);
+  // Quartiles of non-zero days, like GitHub, so one huge day doesn't wash out the rest.
+  const nz = days.map((d) => d.contributionCount).filter(Boolean).sort((a, b) => a - b);
+  const q = [0.25, 0.5, 0.75].map((p) => nz[Math.floor(p * (nz.length - 1))] ?? max);
+  const level = (n) => (!n ? 0 : n <= q[0] ? 1 : n <= q[1] ? 2 : n <= q[2] ? 3 : 4);
+  let lastMonth = null;
+  weeks.forEach((w, i) => {
+    const x = x0 + i * step;
+    const m = w[0].date.slice(5, 7);
+    if (m !== lastMonth && i < weeks.length - 2 && new Date(w[0].date).getUTCDate() <= 7) {
+      b += text('mono', 11, x, top - 10, MONTHS[+m - 1], t.muted);
+    }
+    lastMonth = m;
+    for (const d of w) {
+      b += `<rect x="${x}" y="${top + d.weekday * step}" width="${cell}" height="${cell}" rx="2.5" fill="${t.heat[level(d.contributionCount)]}"/>`;
     }
   });
-  return { w: W, h: top + ph + 56, body: b };
+  ['Mon', 'Wed', 'Fri'].forEach((dn, i) => { b += text('mono', 11, PAD, top + (1 + i * 2) * step + 9, dn, t.muted); });
+  const by = top + 7 * step + 22;
+  b += text('body', 13, PAD, by + 9, `${fmt(stats.contributions)} contributions · busiest day ${fmt(max)} on ${busiest}`, t.muted);
+  const lx = W - PAD - 5 * step - measure('mono', 11, 'More') - 8;
+  b += text('mono', 11, lx - 8, by + 9, 'Less', t.muted, { anchor: 'end' });
+  t.heat.forEach((c, i) => { b += `<rect x="${lx + i * step}" y="${by}" width="${cell}" height="${cell}" rx="2.5" fill="${c}"/>`; });
+  b += text('mono', 11, lx + 5 * step + 5, by + 9, 'More', t.muted);
+  const h = by + 34;
+  return { w: W, h, body: panel(t, h) + panelTitle(t, 'Contributions', 'last 12 months') + b };
 }
 
-function repoRow(t, r) {
-  let b = hline(0, 0, W, t.line);
+function languagesPanel(t) {
+  const cols = 2, colGap = 40, cw = (W - PAD * 2 - colGap) / cols, rh = 44, top = 58;
+  const max = languages[0].share;
+  let b = '';
+  languages.forEach((l, i) => {
+    const col = Math.floor(i / Math.ceil(languages.length / cols)), row = i % Math.ceil(languages.length / cols);
+    const x = PAD + col * (cw + colGap), y = top + row * rh;
+    b += langIcon(l.name, x, y, 16, t);
+    b += text('bodyBold', 14.5, x + 26, y + 13, l.name, t.ink);
+    b += text('mono', 12.5, x + cw, y + 13, `${(l.share * 100).toFixed(1)}%`, t.muted, { anchor: 'end' });
+    b += `<rect x="${x}" y="${y + 24}" width="${cw}" height="5" rx="2.5" fill="${t.track}"/>`;
+    b += `<rect x="${x}" y="${y + 24}" width="${Math.max(5, (l.share / max) * cw)}" height="5" rx="2.5" fill="${i ? t.ink : t.accent}"/>`;
+  });
+  const h = top + Math.ceil(languages.length / cols) * rh + 10;
+  const note = otherShare > 0 ? `all owned repos · other ${(otherShare * 100).toFixed(1)}%` : 'all owned repos';
+  return { w: W, h, body: panel(t, h) + panelTitle(t, 'Languages', note) + b };
+}
+
+function topicsPanel(t) {
+  const top = 54, ch = 34, gap = 10;
+  let x = PAD, y = top, b = '';
+  for (const r of trackRows) {
+    const nw = measure('monoMed', 12.5, String(r.count)) + 16;
+    const w = 14 + measure('bodyBold', 14, r.name) + 10 + nw + 4;
+    if (x + w > W - PAD) { x = PAD; y += ch + gap; }
+    b += `<rect x="${x + 0.5}" y="${y + 0.5}" width="${w - 1}" height="${ch - 1}" rx="${ch / 2}" fill="none" stroke="${t.line}"/>`;
+    b += text('bodyBold', 14, x + 14, y + 22, r.name, t.ink);
+    const nx = x + w - nw - 4;
+    b += `<rect x="${nx}" y="${y + 4}" width="${nw}" height="${ch - 8}" rx="${(ch - 8) / 2}" fill="${t.accent}"/>`;
+    b += text('monoMed', 12.5, nx + nw / 2, y + 21.5, String(r.count), t.onAccent, { anchor: 'middle' });
+    x += w + gap;
+  }
+  const h = y + ch + PAD;
+  return { w: W, h, body: panel(t, h) + panelTitle(t, 'Study repositories', `${studyRepos.length} repos · one per topic`) + b };
+}
+
+const sectionLabel = (t, str) => ({ w: W, h: 34, body: `<rect x="0" y="13" width="3" height="12" fill="${t.accent}"/>` + label(12, 24, str, t) });
+
+function repoCard(t, r) {
+  const h = 64;
+  let b = panel(t, h);
   const lang = r.primaryLanguage?.name;
   const pushed = new Date(r.pushedAt);
-  const meta = `${MONTHS[pushed.getUTCMonth()]} ${pushed.getUTCFullYear()}`;
-  const right = 190;
-  b += text('display', 17, 0, 32, ellipsize('display', 17, r.name, W - right - 20), t.ink, { ls: -0.34 });
-  // Without a description the row collapses to one line: date beside the name.
+  const right = 230;
   const desc = r.description?.trim();
-  if (desc) b += text('body', 14.5, 0, 56, ellipsize('body', 14.5, desc, W - right - 20), t.muted);
-  const metaX = desc || !lang ? W : W - 150;
+  b += text('display', 16.5, PAD, desc ? 28 : 38, ellipsize('display', 16.5, r.name, W - right - PAD * 2), t.ink, { ls: -0.33 });
+  if (desc) b += text('body', 13.5, PAD, 48, ellipsize('body', 13.5, desc, W - right - PAD * 2), t.muted);
+  const when = `${MONTHS[pushed.getUTCMonth()]} ${pushed.getUTCDate()}, ${pushed.getUTCFullYear()}`;
+  b += text('mono', 12, W - PAD, 38, when, t.muted, { anchor: 'end' });
   if (lang) {
     const name = c.languageAliases[lang] ?? lang;
-    const lw = measure('mono', 12.5, name);
-    b += langIcon(name, W - lw - 26, 19, 16, t);
-    b += text('mono', 12.5, W, 32, name, t.ink, { anchor: 'end' });
+    const rx = W - PAD - measure('mono', 12, when) - 24;
+    b += text('mono', 12, rx, 38, name, t.ink, { anchor: 'end' });
+    b += langIcon(name, rx - measure('mono', 12, name) - 22, 26, 15, t);
   }
-  b += text('mono', 12.5, metaX, desc ? 56 : 32, `pushed ${meta}`, t.muted, { anchor: 'end' });
-  return { w: W, h: desc ? 74 : 50, body: b };
+  return { w: W, h, body: b };
 }
 
-function linkButton(t, { icon: name, text: str }) {
-  const size = 15, w = 14 + 18 + 8 + measure('bodyBold', size, str) + 14;
-  const glyph = name === 'logo' ? logoMark(17, 11, 18, t.ink) : icon(name, 14.5, 11.5, 18, t.ink);
-  const body = `<rect x="0.5" y="0.5" width="${w}" height="39" fill="none" stroke="${t.line}"/>` +
-    glyph + text('bodyBold', size, 40.5, 25.5, str, t.ink);
-  return { w: w + 1, h: 41, body };
-}
-
-function foot(t) {
-  const body = hline(0, 0, W, t.line) +
-    text('mono', 12.5, 0, 40, `Updated ${today} · generated from the GitHub API`, t.muted) +
-    logoMark(W - 14, 25, 20, t.ink);
-  return { w: W, h: 64, body };
+function linkChip(t, { icon: name, text: str }) {
+  const size = 14, w = 14 + 16 + 9 + measure('bodyBold', size, str) + 16, h = 38;
+  const glyph = name === 'logo' ? logoMark(16, 11, 16, t.ink) : icon(name, 14, 11, 16, t.ink);
+  const body = `<rect x="0.5" y="0.5" width="${w - 1}" height="${h - 1}" rx="${h / 2}" fill="${t.panel}" stroke="${t.line}"/>` +
+    glyph + text('bodyBold', size, 39, 24, str, t.ink);
+  return { w, h, body };
 }
 
 // ---------- output ----------
@@ -283,18 +305,15 @@ async function emit(name, render) {
 }
 
 await emit('header', header);
-await emit('tiles', tiles);
-await emit('languages-head', (t) => sectionHead(t, 'Languages', 'What the code is written in', 'Share of code across all owned repositories, public and private.'));
-await emit('languages', languagesChart);
-await emit('activity-head', (t) => sectionHead(t, 'Activity', `${fmt(stats.contributions)} contributions in the last 12 months`, 'Contributions per month, private repositories included.'));
-await emit('activity', contributionsChart);
-await emit('study-head', (t) => sectionHead(t, 'Study in public', `${studyRepos.length} study repositories`, 'One repository per topic, grouped by track.'));
-await emit('study', tracksChart);
-await emit('recent-head', (t) => sectionHead(t, 'Recently pushed', null, null));
+await emit('overview', statGrid);
+await emit('contributions', heatmap);
+await emit('languages', languagesPanel);
+await emit('topics', topicsPanel);
+await emit('recent-head', (t) => sectionLabel(t, 'Recently pushed'));
 const recentFiles = [];
-for (const r of recent) recentFiles.push({ r, file: await emit(`repo-${r.name.toLowerCase()}`, (t) => repoRow(t, r)) });
-for (const l of c.links) await emit(`link-${l.id}`, (t) => linkButton(t, l));
-await emit('footer', foot);
+for (const r of recent) recentFiles.push({ r, file: await emit(`repo-${r.name.toLowerCase()}`, (t) => repoCard(t, r)) });
+await emit('links-head', (t) => sectionLabel(t, 'Find me elsewhere'));
+for (const l of c.links) await emit(`link-${l.id}`, (t) => linkChip(t, l));
 
 // Embed one subset per font, covering every glyph used across all SVGs.
 const faces = {};
@@ -322,30 +341,27 @@ const pic = (name, alt) =>
 const linked = (href, name, alt) => `<a href="${href}">${pic(name, alt)}</a>`;
 const pct = (v) => `${(v * 100).toFixed(1)}%`;
 
-// The charts are images, so the same numbers also ship as collapsible tables.
+// The panels are images, so the same numbers also ship as collapsible tables.
 const readme = `<!-- Generated by \`npm run build\` from the GitHub API and src/content.mjs. Do not edit by hand. -->
 
 <p>
-${linked(c.site, 'header', `Igor Barral. ${c.header.label}. ${c.header.motto.join(' ')}`)}
+${linked(`https://github.com/${stats.login}`, 'header', `${stats.login}, on GitHub since ${since.getUTCFullYear()}. Updated ${today}.`)}
 </p>
 
 <p>
-${pic('tiles', `${stats.repos.length} repositories: ${publicRepos.length} public, ${stats.repos.length - publicRepos.length} private. ${stats.contributions} contributions in the last 12 months. ${studyRepos.length} study repositories. ${years} years on GitHub.`)}
+${pic('overview', `${stats.contributions} contributions and ${stats.commits} commits in the last 12 months, ${activeDays} active days, current streak ${streak.current} days, longest ${streak.longest} days, ${stats.repos.length} repositories, ${studyRepos.length} study repositories, ${years} years on GitHub.`)}
 </p>
 
 <p>
-${pic('languages-head', 'Languages')}<br>
+${pic('contributions', `Contribution calendar: ${stats.contributions} contributions in the last 12 months.`)}
+</p>
+
+<p>
 ${pic('languages', languages.map((l) => `${l.name} ${pct(l.share)}`).join(', '))}
 </p>
 
 <p>
-${pic('activity-head', 'Activity')}<br>
-${pic('activity', stats.months.map(([k, n]) => `${k}: ${n}`).join(', '))}
-</p>
-
-<p>
-${pic('study-head', 'Study in public')}<br>
-${pic('study', trackRows.map((r) => `${r.name}: ${r.count}`).join(', '))}
+${pic('topics', trackRows.map((r) => `${r.name}: ${r.count}`).join(', '))}
 </p>
 
 <p>
@@ -354,6 +370,7 @@ ${recentFiles.map(({ r, file }) => linked(r.url, file, `${r.name}: ${r.descripti
 </p>
 
 <p>
+${pic('links-head', 'Find me elsewhere')}<br>
 ${c.links.map((l) => linked(l.href, `link-${l.id}`, l.text)).join('&nbsp;\n')}
 </p>
 
@@ -374,10 +391,6 @@ ${stats.months.map(([k, n]) => `| ${k} | ${n} |`).join('\n')}
 ${trackRows.map((r) => `| ${r.name} | ${r.count} |`).join('\n')}
 
 </details>
-
-<p>
-${pic('footer', `Updated ${today}`)}
-</p>
 `;
 
 await writeFile(new URL('README.md', ROOT), readme);
